@@ -96,6 +96,49 @@ Claude Code matches the request against the skill's `description` field,
 loads `SKILL.md`, and generates UI using `brand-600`, `Source Serif 4`,
 flat pills, 8pt grid — without being re-taught the system.
 
+## Dashboard Preview
+
+The design system in action — a full dashboard screen showing the sidebar,
+hero, KPI cards, workflow section, and library grid working together.
+
+![Dashboard Preview](https://raw.githubusercontent.com/1-fish-chapaak/design-sys/design-sys-updates/assets/dashboard-preview.png)
+
+**What you see:**
+
+| Surface | Spec |
+|---------|------|
+| Sidebar | Dark `brand-900` (#26064A), 256px, white text with opacity hierarchy |
+| Active nav | 8% white bg + 3px white left bar + white text (weight 600) |
+| Canvas | `#FCFAFD` — brand-600 at ~2% over white |
+| Hero | White-to-lavender gradient, Source Serif 4 display heading, wave decoration |
+| KPI cards | Source Serif 4 tabular numerics, `brand-600` bottom border on active card |
+| Cards | `paper-0` white, `#F0EAF6` subtle border, 12px radius |
+| Pills | Flat — `brand-50` bg, `brand-700` text, no border, no icon |
+| Typography | Inter for UI (13px/520), Source Serif 4 for display (38-44px) |
+
+### Sidebar structure
+
+```
+IRAME.AI (logo + "Audit Intelligence" dropdown)
+├── Ask IRA
+├── Search
+├── Home ← (active: white left bar + white text)
+├── Recents
+├── ── PROGRAMS ──
+│   ├── Planning
+│   ├── Process Hub
+│   ├── Risk Register [14]
+│   └── Control Library
+├── Dashboard
+├── Report
+├── Workflow Library
+├── AI Concierge
+├── ──────────────
+├── Configuration
+├── Admin
+└── John Doe / Lead Auditor (profile card)
+```
+
 ## Browse the design visually
 
 ```sh
