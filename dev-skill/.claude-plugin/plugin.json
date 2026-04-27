@@ -1,0 +1,7 @@
+{
+  "name": "auditify-dev",
+  "version": "0.1.0",
+  "description": "Dev skill for auditify-app — enforces hard rules and clarification gates from CLAUDE.md + decisions/ on every Claude Code session inside the repo.",
+  "author": "tech-irame",
+  "homepage": "https://github.com/tech-irame/auditify-dev"
+}
