@@ -1,19 +1,26 @@
-## CLARIFY FIRST — pause and ask before proceeding
+## PROCEED MODE — default behaviour (faster than asking)
 
-Before doing any of these, ask 1–3 pointed questions. **Do not assume an interpretation and start coding.** If the user's intent is ambiguous on any axis below, surface it.
+Default: pick the most likely interpretation, **state your assumption in one line at the top of your response**, and proceed. Do NOT pause for confirmation. The dev catches it in review or stops you mid-stream if wrong. Asking is friction — devs accept the recommendation 90% of the time anyway.
 
-| Trigger | Required clarification |
-|---|---|
-| Vague scope ("improve", "clean up", "refactor", "make better", no acceptance criterion) | Pick: (a) minimum change to satisfy a specific behavior, (b) localized refactor of <file>, (c) cross-cutting change. Also: what's the success signal? |
-| **New dependency** (`uv add`, `npm install <pkg>`) | Confirm: (1) is this part of existing scope or a new architectural choice? (2) If new — should I draft `decisions/NNNN-adopt-<pkg>.md` first? |
-| **New abstraction** — new helper module, wrapper used in <2 call sites, new util folder | "Minimum change is N lines in `<file>`. You're asking for an abstraction. Confirm: do you want the abstraction now (and why — anticipated reuse?), or the minimum change?" |
-| **Deploy / auth / migration / tenant-flow / encryption change** | This is ADR-worthy per CLAUDE.md trigger list. Draft ADR before / with the change? |
-| **Schema change** (`alembic revision`) | Confirm: (1) reversible? (2) PR description will note schema-break for the team? (3) suggested slug. |
-| **Delete or rename** of any file with >0 grep hits elsewhere | List the references found. Confirm proceed. |
-| **Cross-stack change** (touches both `auditify-fe/` and `auditify-be/`) | Confirm: single atomic commit/PR (recommended per ADR 0001) or split? |
-| **Edits to `compose.*.yml`, `nginx/`, `scripts/`, `.pre-commit-config.yaml`** | Are you fixing a known follow-up (cite F-INFRA-N from `notes/0001-followups.md`) or doing something new (then likely ADR-worthy)? |
-| **New endpoint** | Confirm: tenant-scoped (default) or platform-level (rare)? Schema under `app/schemas/<resource>.py`? Router under `app/api/routes/<resource>.py`? Model under `app/models/<resource>.py`? |
-| **Next 16 specifics** (server actions, caching directives, layouts, RSC boundaries) | Next 16 has breaking changes from training data. Confirm I should fetch `node_modules/next/dist/docs/<area>/` before writing code. |
-| **Frontend state mgmt that isn't hooks/RSC** | Cite `auditify-fe/AGENTS.md` "no Redux/Zustand without team agreement". Confirm team agreement, otherwise refuse and propose hooks/RSC alternative. |
-| **Adding email / SMS / SMTP** | `app/core/email.py` exists — extend it. Confirm not adding a new SMTP path. |
-| **Test-only changes that mark something `xfail` or `skip`** | Skips are visible as gaps; xfails hide. Cite F-TEST notes. Confirm skip vs xfail intent and that it shows up as a tracked follow-up. |
+Examples of proceed-mode in action:
+- Vague "improve the X component" → assume the highest-impact obvious change (e.g., extract a duplicated render block; add proper a11y attrs); state "Assuming you want X — say so if you wanted Y" and ship.
+- New endpoint, no spec → follow the existing route's shape (router under `app/api/routes/<resource>.py`, schema under `app/schemas/`, model under `app/models/`); state assumptions about tenant scope, auth, response shape; ship.
+- New util that's needed in 1 place → put it inline in the caller, not a new module. If reused later, extract then.
+- Cross-stack change → write both halves in one commit (ADR 0001 prefers atomic), name the FE/BE files at the top.
+- Unfamiliar Next 16 area → write a reasonable guess from training data, **then** read `node_modules/next/dist/docs/<area>/` to verify, fix if wrong. Don't pause to ask permission to read docs.
+
+## STILL ASK FIRST — only when irreversible
+
+Three cases where mistakes are expensive enough to warrant a pause:
+
+1. **Schema change** — `alembic revision`, model field added/removed/renamed. Confirm: reversible? PR description note for the team? Suggested slug. Mistake here = production data ambiguity.
+
+2. **Delete / rename of load-bearing files** — `CLAUDE.md`, `scripts/dev.sh`/`deploy.sh`/`migrate-prod.sh`, `compose.*.yml`, `nginx/*.conf`, `.pre-commit-config.yaml`, anything in `decisions/`. Confirm with the path list and a one-line reason.
+
+3. **Adopting a new framework-level dependency** — anything that introduces a new architectural layer (state mgmt lib, ORM, auth provider, queue system). For small utility libs (a date helper, a UUID lib), just `uv add` / `npm install` and mention.
+
+That's it. For every other "should I do X or Y" — pick X, state why, proceed.
+
+## Thinking depth
+
+Use **deep / extended thinking on any non-trivial decision**. "Non-trivial" = any change that touches more than the immediately edited symbol's signature, any architectural choice, anything in the irreversible list above. Trivial edits (rename, single-line fix, comment add) — just do them. Deep thinking trades a few seconds of latency for fewer rework loops, which is the actual speed win.
